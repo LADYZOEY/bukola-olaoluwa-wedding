@@ -79,7 +79,7 @@ def apply_edits():
 
     # 3. Update Event Details (JT)
     old_jt_obj = 'time:"4:00 PM",date:"2026-12-09",venue:"Celebration Pavilion",address:"Between Ogun State & Lagos State",city:"Nigeria",coordinates:{lat:48.8809,lng:2.3833}'
-    new_jt_obj = 'time:"9:00 AM",date:"2026-12-09",venue:"Sango ijoko road, beside fariwad filling station",address:"Sango ota",city:"Ogun State",coordinates:{lat:6.7092,lng:3.2384}'
+    new_jt_obj = 'time:"9:00 AM",date:"2026-12-09",venue:"MAO EVENTS CENTRE, Sango ijoko road, beside fariwad filling station",address:"Sango ota",city:"Ogun State",coordinates:{lat:6.7092,lng:3.2384}'
     if old_jt_obj in js:
         js = js.replace(old_jt_obj, new_jt_obj)
         print("✓ Updated Event Details object to 9:00 AM & Sango Ota, Ogun State")
@@ -103,7 +103,7 @@ def apply_edits():
         print("✓ Updated Google Maps embed to Sango ijoko road location")
 
     old_map_title = 'title:"Celebration Venue - Between Ogun State & Lagos State"'
-    new_map_title = 'title:"Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State"'
+    new_map_title = 'title:"MAO EVENTS CENTRE, Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State"'
     if old_map_title in js:
         js = js.replace(old_map_title, new_map_title)
         print("✓ Updated Map title")
@@ -181,20 +181,20 @@ def apply_edits():
 
     # Update calendar download in RA
     old_ra_ics = 'start:"20261209T160000",end:"20261209T180000",location:"Between Ogun State & Lagos State, Nigeria"'
-    new_ra_ics = 'start:"20261209T090000",end:"20261209T150000",location:"Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State"'
+    new_ra_ics = 'start:"20261209T090000",end:"20261209T150000",location:"MAO EVENTS CENTRE, Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State"'
     if old_ra_ics in js:
         js = js.replace(old_ra_ics, new_ra_ics)
         print("✓ Updated RA calendar event time & location")
 
     # Update Thank-you venue prompt
     old_ty_en = 'We look forward to celebrating with you on Wednesday, 9th December between Ogun State & Lagos State.'
-    new_ty_en = 'We look forward to celebrating with you on Wednesday, 9th December at Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State.'
+    new_ty_en = 'We look forward to celebrating with you on Wednesday, 9th December at MAO EVENTS CENTRE, Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State.'
     if old_ty_en in js:
         js = js.replace(old_ty_en, new_ty_en)
         print("✓ Updated RSVP thank-you venue prompt")
 
     old_ty_fr = "Nous vous attendons le mercredi 9 décembre entre l'État d'Ogun et l'État de Lagos."
-    new_ty_fr = "Nous vous attendons le mercredi 9 décembre à Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State."
+    new_ty_fr = "Nous vous attendons le mercredi 9 décembre à MAO EVENTS CENTRE, Sango ijoko road, beside fariwad filling station, Sango ota, Ogun State."
     if old_ty_fr in js:
         js = js.replace(old_ty_fr, new_ty_fr)
         print("✓ Updated French RSVP thank-you prompt")

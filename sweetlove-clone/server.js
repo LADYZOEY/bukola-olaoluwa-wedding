@@ -47,6 +47,117 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (pathname === '/api/rsvp') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200);
+      return res.end();
+    }
+
+    if (req.method !== 'POST') {
+      res.writeHead(405, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+    }
+
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const { fullName, whatsapp, attending, message } = payload;
+
+        if (!fullName || typeof fullName !== 'string' || !fullName.trim()) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Full name is required.' }));
+        }
+
+        let attendingStatus = 'Joyfully Accept';
+        if (attending === 'Regretfully Decline' || attending === 'no') {
+          attendingStatus = 'Regretfully Decline';
+        } else if (attending === 'Joyfully Accept' || attending === 'yes') {
+          attendingStatus = 'Joyfully Accept';
+        } else if (attending && typeof attending === 'string') {
+          attendingStatus = attending.trim();
+        }
+
+        const NOTION_API_KEY = process.env.NOTION_API_KEY || getEnv('NOTION_API_KEY');
+        const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID || getEnv('NOTION_DATABASE_ID');
+
+        if (!NOTION_API_KEY || !NOTION_DATABASE_ID) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Server configuration error: Notion credentials missing.' }));
+        }
+
+        const notionPayload = {
+          parent: { database_id: NOTION_DATABASE_ID },
+          properties: {
+            'Full Name': {
+              title: [
+                {
+                  text: {
+                    content: fullName.trim()
+                  }
+                }
+              ]
+            },
+            ...(whatsapp && typeof whatsapp === 'string' && whatsapp.trim()
+              ? {
+                  'WhatsApp Number': {
+                    phone_number: whatsapp.trim()
+                  }
+                }
+              : {}),
+            'Attending': {
+              select: {
+                name: attendingStatus
+              }
+            },
+            'Message for the Couple': {
+              rich_text:
+                message && typeof message === 'string' && message.trim()
+                  ? [
+                      {
+                        text: {
+                          content: message.trim()
+                        }
+                      }
+                    ]
+                  : []
+            }
+          }
+        };
+
+        const notionRes = await fetch('https://api.notion.com/v1/pages', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${NOTION_API_KEY}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(notionPayload)
+        });
+
+        const notionData = await notionRes.json();
+        if (!notionRes.ok) {
+          console.error('Notion API error:', notionData);
+          res.writeHead(502, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: notionData.message || 'Error creating RSVP record in Notion.' }));
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: true, pageId: notionData.id }));
+      } catch (err) {
+        console.error('RSVP local handler error:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: err.message || 'Internal Server Error' }));
+      }
+    });
+    return;
+  }
+
   // Default to index.html for root
   if (pathname === '/' || pathname === '') {
     pathname = '/index.html';
@@ -207,6 +318,24 @@ function proxyAndCache(pathname, search, localFilePath, req, clientRes) {
   });
 
   proxyReq.end();
+}
+
+function getEnv(key) {
+  if (process.env[key]) return process.env[key];
+  const envPaths = [path.join(__dirname, '../.env'), path.join(__dirname, '.env')];
+  for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+        if (match && match[1] === key) {
+          return match[2] ? match[2].trim() : '';
+        }
+      }
+    }
+  }
+  return '';
 }
 
 server.listen(PORT, () => {

@@ -2,7 +2,7 @@
   "outputDirectory": "sweetlove-clone",
   "rewrites": [
     {
-      "source": "/((?!assets/|__l5e/|music/|lovable-uploads/|.*\\..*).*)",
+      "source": "/((?!assets/|__l5e/|music/|lovable-uploads/|api/|.*\\..*).*)",
       "destination": "/index.html"
     }
   ]
