@@ -1,0 +1,9 @@
+.DS_Store
+*.log
+browser_errors.log
+.claude/
+__pycache__/
+*.pyc
+.env
+.env.*
+
