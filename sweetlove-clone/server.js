@@ -47,6 +47,11 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (pathname === '/_vercel/insights/script.js') {
+    res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+    return res.end('window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };');
+  }
+
   if (pathname === '/api/rsvp') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
